@@ -51,6 +51,18 @@ $(function(){
 			$('#user_name').next().hide();
 			error_name = false;
 		}
+        // username = $('#user_name')
+        // $.get('/user_name/',{'username':username},function (data) {
+			// if(data.nums>=1){
+			// 	$('#user_name').next().html('用户名已注册！')
+			// 	$('#user_name').next().show();
+			// }
+			// else {
+			// 	$('#user_name').next().html('恭喜你，该用户名可以使用！')
+			// 	$('#user_name').next().show();
+			// }
+        //
+        // })
 	}
 
 	function check_pwd(){
@@ -119,6 +131,7 @@ $(function(){
 		{
 			return false;
 		}
+
 
 	});
 
