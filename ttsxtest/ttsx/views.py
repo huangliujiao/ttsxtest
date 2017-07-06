@@ -10,16 +10,9 @@ def index(request):
     return render(request,'ttsx/index.html')
 def login(request):
     return render(request,'ttsx/login.html')
-def user_center_info(request):
-    return render(request,'ttsx/user_center_info.html')
 def register(request):
     return render(request,'ttsx/register.html')
-def user_center_order(request):
-    return render(request,'ttsx/user_center_order.html')
-def user_center_site(request):
-    return render(request,'ttsx/user_center_site.html')
-def cart(request):
-    return render(request,'ttsx/cart.html')
+
 
 def register_check(request):
     user_name=request.POST.get('user_name')
@@ -61,14 +54,16 @@ def login_ajax_check(request):
     s1.update(pwd.encode())
     pwd_sha1 = s1.hexdigest()
     yhobj = UserInfo.objects.filter(uname=uname)
-    print(yhobj[0].id)
+    print(len(yhobj))
     print(ujz)
     print(uname)
     print(pwd)
     if len(yhobj) > 0:
         if yhobj[0].upwd == pwd_sha1 :
-            request.session['cookjz'] = yhobj[0].id
+            # response = redirect('/user/',{'res':'ok'})
             response = JsonResponse({'res': 'ok'})
+            request.session['uid'] = yhobj[0].id
+
             if(ujz=='true'):
                 response.set_cookie('uname', uname, expires=datetime.datetime.now() + datetime.timedelta(days=14))
             else:
@@ -78,9 +73,35 @@ def login_ajax_check(request):
             return JsonResponse({'res':'perr'})
     else:
         return JsonResponse({'res': 'uerr'})
+def user_center_info(request):
+    user = UserInfo.objects.get(pk=request.session['uid'])
+    context = {'user': user}
+    return render(request,'ttsx/user_center_info.html',context)
+
+def user_center_order(request):
+    user = UserInfo.objects.get(pk=request.session['uid'])
+    context = {'user': user}
+    return render(request,'ttsx/user_center_order.html',context)
+
+def user_center_site(request):
+    user = UserInfo.objects.get(pk=request.session['uid'])
+    if request.method == 'POST':
+        adrse=request.POST.get('addressee')
+        adrs = request.POST.get('address')
+        code = request.POST.get('code')
+        phone = request.POST.get('phone')
+
+        user.ushou = adrse
+        user.uaddress = adrs
+        user.ucode = code
+        user.uphone= phone
+        user.save()
+    context = {'user': user}
+    return render(request,'ttsx/user_center_site.html',context)
 
 
-
+def cart(request):
+    return render(request,'ttsx/cart.html')
 
 
 
