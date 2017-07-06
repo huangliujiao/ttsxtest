@@ -6,9 +6,33 @@ $(function(){
 	var error_email = false;
 	var error_check = false;
 
-
 	$('#user_name').blur(function() {
-		check_user_name();
+
+		username = $('#user_name').val()
+		var len = $('#user_name').val().length;
+        $.post('/user_name/',{'username':username},function (data) {
+			if(data.nums>=1){
+				$('#user_name').next().html('用户名已注册！')
+				$('#user_name').next().show();
+				error_name = true
+			}
+			else if (data.nums = 0){
+				$('#user_name').next().html('恭喜你，该用户名可以使用！')
+				$('#user_name').next().show();
+			}
+				// check_user_name();
+			else  if(len<5||len>20) {
+				$('#user_name').next().html('请输入5-20个字符的用户名')
+				$('#user_name').next().show();
+				error_name = true;
+			}
+			else {
+				$('#user_name').next().hide();
+				error_name = false;
+			}
+        });
+
+
 	});
 
 	$('#pwd').blur(function() {
@@ -51,18 +75,7 @@ $(function(){
 			$('#user_name').next().hide();
 			error_name = false;
 		}
-        // username = $('#user_name')
-        // $.get('/user_name/',{'username':username},function (data) {
-			// if(data.nums>=1){
-			// 	$('#user_name').next().html('用户名已注册！')
-			// 	$('#user_name').next().show();
-			// }
-			// else {
-			// 	$('#user_name').next().html('恭喜你，该用户名可以使用！')
-			// 	$('#user_name').next().show();
-			// }
-        //
-        // })
+
 	}
 
 	function check_pwd(){
@@ -131,10 +144,26 @@ $(function(){
 		{
 			return false;
 		}
-
-
 	});
+	$('#sub').click(function () {
+			if(error_name==true){
+				alert('用户名输入错误')
 
+			}
+			else if (error_password==true){
+				alert('密码输入错误！')
+			}
+			else if(error_check_password==true){
+				alert('两次输入的密码不一致！')
+			}
+			else if(error_email){
+				alert('邮箱格式错误！')
+			}
+			else if (error_check==true){
+				alert('请勾选协议！')
+			}
+			// location.href = '/register/'
+    })
 
 
 

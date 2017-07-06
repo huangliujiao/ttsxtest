@@ -5,6 +5,42 @@
 	<title>天天生鲜--登录</title>
 	<link rel="stylesheet" type="text/css" href="/static/css/reset.css">
 	<link rel="stylesheet" type="text/css" href="/static/css/main.css">
+
+	<!--<script type="text/javascript" src="/static/js/csrf.js"></script>-->
+	<script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
+	<script>
+		$(function () {
+		      $.ajaxSetup({
+            		data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+           		 });
+
+		      var cookname=$.cookie('uname');
+
+		      $('#uname').val(cookname)
+			  $('#btn').click(function () {
+                uname = $('#uname').val() //获取用户名
+                pwd = $('#pwd').val() //获取密码
+			     user_jz= $('#user_jz').prop('checked'); //获取密码
+                 $.post('/login_ajax_check/', {'uname':uname, 'pwd':pwd,'user_jz':user_jz }, function (data) {
+                    //获取返回的数据并进行操作
+                    //alert(data.res)
+                    if (data.res == 'ok') {
+                        //登录成功
+                        location.href = '/user_center_info/' //跳转到成功页面
+                    }else if(data.res=='uerr'){
+                        //登录失败
+                        $('.user_error').show()
+                        $('.user_error').text('用户名错误')
+                    }else if (data.res=='perr'){
+                        $('.pwd_error').show()
+						$('.pwd_error').text('密码错误！')
+					}
+                });
+            });
+
+        });
+	</script>
 </head>
 <body>
 	<div class="login_top clearfix">
@@ -18,21 +54,22 @@
 			<div class="login_form fr">
 				<div class="login_title clearfix">
 					<h1>用户登录</h1>
-					<a href="#">立即注册</a>
+					<a href="/register/">立即注册</a>
 				</div>
 				<div class="form_input">
-					<form>
-						<input type="text" name="username" class="name_input" placeholder="请输入用户名">
+					<!--<form method="post" action="/login_check/">-->
+						<input type="text" name="uname" id="uname" class="name_input" placeholder="请输入用户名">
 						<div class="user_error">输入错误</div>
-						<input type="password" name="pwd" class="pass_input" placeholder="请输入密码">
+						<input type="password" name="pwd"  id="pwd" class="pass_input" placeholder="请输入密码">
 						<div class="pwd_error">输入错误</div>
 						<div class="more_input clearfix">
-							<input type="checkbox" name="">
+							<input type="checkbox" name="user_jz" id="user_jz" value="1" checked="checked">
 							<label>记住用户名</label>
 							<a href="#">忘记密码</a>
 						</div>
-						<input type="submit" name="" value="登录" class="input_submit">
-					</form>
+						<!--<input type="submit" name="" value="登录" class="input_submit">-->
+						 <input type="button" id="btn" class="input_submit" value="登陆">
+					<!--</form>-->
 				</div>
 			</div>
 		</div>
