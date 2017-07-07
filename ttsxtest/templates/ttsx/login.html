@@ -1,13 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-<head>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<title>天天生鲜--登录</title>
-	<link rel="stylesheet" type="text/css" href="/static/css/reset.css">
-	<link rel="stylesheet" type="text/css" href="/static/css/main.css">
-
-	<!--<script type="text/javascript" src="/static/js/csrf.js"></script>-->
-	<script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
+{% extends 'ttsx/base.html' %}
+{% block head %}
 	<script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
 	<script>
 		$(function () {
@@ -15,19 +7,23 @@
             		data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
            		 });
 
-		      var cookname=$.cookie('uname');
-
-		      $('#uname').val(cookname)
+		      	var cookname=$.cookie('uname');
+		      	$('#uname').val(cookname)
 			  $('#btn').click(function () {
                 uname = $('#uname').val() //获取用户名
                 pwd = $('#pwd').val() //获取密码
 			     user_jz= $('#user_jz').prop('checked'); //获取密码
                  $.post('/login_ajax_check/', {'uname':uname, 'pwd':pwd,'user_jz':user_jz }, function (data) {
                     //获取返回的数据并进行操作
-                    //alert(data.res)
+
                     if (data.res == 'ok') {
                         //登录成功
-                        location.href = '/user_center_info/' //跳转到成功页面
+						if(data.path==null){
+						    location.href = '/user_center_info/' //跳转到用户页面
+						}else {
+						     location.href = data.path //跳转到上次记录页面
+						}
+
                     }else if(data.res=='uerr'){
                         //登录失败
                         $('.user_error').show()
@@ -41,10 +37,10 @@
 
         });
 	</script>
-</head>
-<body>
+{% endblock head %}
+{% block body %}
 	<div class="login_top clearfix">
-		<a href="index.html" class="login_logo"><img src="/static/images/logo02.png"></a>
+		<a href="/index/" class="login_logo"><img src="/static/images/logo02.png"></a>
 	</div>
 
 	<div class="login_form_bg">
@@ -75,19 +71,4 @@
 		</div>
 	</div>
 
-	<div class="footer no-mp">
-		<div class="foot_link">
-			<a href="#">关于我们</a>
-			<span>|</span>
-			<a href="#">联系我们</a>
-			<span>|</span>
-			<a href="#">招聘人才</a>
-			<span>|</span>
-			<a href="#">友情链接</a>		
-		</div>
-		<p>CopyRight © 2016 北京天天生鲜信息技术有限公司 All Rights Reserved</p>
-		<p>电话：010-****888    京ICP备*******8号</p>
-	</div>
-	
-</body>
-</html>
+{%endblock body%}

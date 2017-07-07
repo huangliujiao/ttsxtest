@@ -3,16 +3,21 @@ from django.shortcuts import render,redirect
 from .models import UserInfo
 from django.http import JsonResponse,HttpResponse
 from hashlib  import sha1
+from .decorate import percolator
 import datetime
 
 # Create your views here.
-def index(request):
-    return render(request,'ttsx/index.html')
-def login(request):
-    return render(request,'ttsx/login.html')
-def register(request):
-    return render(request,'ttsx/register.html')
 
+def login(request):
+    context = {'title': '登录', 'top': '0'}
+    return render(request,'ttsx/login.html',context)
+def register(request):
+    context = {'title': '注册', 'top': '0'}
+    return render(request,'ttsx/register.html',context)
+def loginout(request):
+    del request.session['uid']
+    # del request.session['uname']
+    return redirect('/login/')
 
 def register_check(request):
     user_name=request.POST.get('user_name')
@@ -54,16 +59,14 @@ def login_ajax_check(request):
     s1.update(pwd.encode())
     pwd_sha1 = s1.hexdigest()
     yhobj = UserInfo.objects.filter(uname=uname)
-    print(len(yhobj))
-    print(ujz)
-    print(uname)
-    print(pwd)
     if len(yhobj) > 0:
         if yhobj[0].upwd == pwd_sha1 :
-            # response = redirect('/user/',{'res':'ok'})
-            response = JsonResponse({'res': 'ok'})
-            request.session['uid'] = yhobj[0].id
+            path=request.session.get('url_path')
 
+            # path=str(path)
+            print(path)
+            response = JsonResponse({'res': 'ok','path':path})
+            request.session['uid'] = yhobj[0].id
             if(ujz=='true'):
                 response.set_cookie('uname', uname, expires=datetime.datetime.now() + datetime.timedelta(days=14))
             else:
@@ -73,16 +76,20 @@ def login_ajax_check(request):
             return JsonResponse({'res':'perr'})
     else:
         return JsonResponse({'res': 'uerr'})
+
+@percolator.perc
 def user_center_info(request):
     user = UserInfo.objects.get(pk=request.session['uid'])
     context = {'user': user}
     return render(request,'ttsx/user_center_info.html',context)
 
+@percolator.perc
 def user_center_order(request):
     user = UserInfo.objects.get(pk=request.session['uid'])
     context = {'user': user}
     return render(request,'ttsx/user_center_order.html',context)
 
+@percolator.perc
 def user_center_site(request):
     user = UserInfo.objects.get(pk=request.session['uid'])
     if request.method == 'POST':
@@ -99,7 +106,13 @@ def user_center_site(request):
     context = {'user': user}
     return render(request,'ttsx/user_center_site.html',context)
 
-
+def index(request):
+    if request.session.has_key('uid'):
+        user = UserInfo.objects.get(pk=request.session['uid'])
+        context = {'user': user,'title': '首页', 'nav': '0'}
+        return render(request,'ttsx/index.html',context)
+    else:
+        return render(request,'ttsx/index.html')
 def cart(request):
     return render(request,'ttsx/cart.html')
 

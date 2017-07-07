@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^user_center_site/$',views.user_center_site),
     url(r'^cart/$',views.cart),
     url(r'^index/$',views.index),
+    url(r'^loginout/$',views.loginout),
 ]
