@@ -6,6 +6,7 @@ class TypeAdmin(admin.ModelAdmin):
 
 class GoodsAdmin(admin.ModelAdmin):
     list_display = ['id','gtitle','gprice']
+    list_per_page = 10
 
 admin.site.register(TypeInfo,TypeAdmin)
 admin.site.register(GoodsInfo,GoodsAdmin)

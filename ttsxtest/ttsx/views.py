@@ -1,6 +1,6 @@
 #coding=utf-8
 from django.shortcuts import render,redirect
-from .models import UserInfo
+from .models import *
 from django.http import JsonResponse,HttpResponse
 from hashlib  import sha1
 from .decorate import percolator
@@ -107,14 +107,42 @@ def user_center_site(request):
     return render(request,'ttsx/user_center_site.html',context)
 
 def index(request):
+    type_list = TypeInfo.objects.all()
+    list1 = []
+    for type1 in type_list:
+        new_list = type1.goodsinfo_set.order_by('-id')[0:4]
+        click_list = type1.goodsinfo_set.order_by('-gclick')[0:4]
+        list1.append({'new_list': new_list, 'click_list': click_list, 't1': type1})
+
     if request.session.has_key('uid'):
         user = UserInfo.objects.get(pk=request.session['uid'])
-        context = {'user': user,'title': '首页', 'nav': '0'}
+        context = {'user': user,'title': '首页', 'nav': '0','list1':list1}
         return render(request,'ttsx/index.html',context)
     else:
-        return render(request,'ttsx/index.html')
+        context = {'list1': list1, 'title': '首页'}
+        return render(request,'ttsx/index.html',context)
+
+def detail(request):
+    s = request.get_full_path()
+    nums = s.split('/')[1]
+    print(nums)
+    gs=GoodsInfo.objects.get(id=nums)
+    if request.session.has_key('uid'):
+        user = UserInfo.objects.get(pk=request.session['uid'])
+        context = {'user': user,'title': '商品信息', 'nav': '0','gs':gs}
+        return render(request, 'ttsx/detail.html',context)
+    else:
+        context = {'title': '商品信息','gs':gs}
+        return render(request,'ttsx/detail.html',context)
+
 def cart(request):
-    return render(request,'ttsx/cart.html')
+    if request.session.has_key('uid'):
+        user = UserInfo.objects.get(pk=request.session['uid'])
+        context = {'user': user, 'title': '购物车', 'nav': '0'}
+        return render(request,'ttsx/cart.html',context)
+    else:
+        context = {'title': '购物车'}
+        return render(request, 'ttsx/cart.html',context)
 
 
 

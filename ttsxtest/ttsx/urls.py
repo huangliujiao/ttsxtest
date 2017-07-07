@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^user_center_order/$',views.user_center_order),
     url(r'^user_center_site/$',views.user_center_site),
     url(r'^cart/$',views.cart),
-    url(r'^index/$',views.index),
+    url(r'^$',views.index),
     url(r'^loginout/$',views.loginout),
+    url(r'^\w+/$',views.detail),
 ]
