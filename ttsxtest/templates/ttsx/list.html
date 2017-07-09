@@ -1,6 +1,5 @@
 {%extends 'ttsx/base.html'%}
 {% block body %}
-
 	<div class="navbar_con">
 		<div class="navbar clearfix">
 			<div class="subnav_con fl">
@@ -35,7 +34,7 @@
 		<div class="l_wrap fl clearfix">
 			<div class="new_goods">
 				<h3>新品推荐</h3>
-				<ul>
+				<ul id="sorts">
 					{%for new in new_list%}
 					<li>
 						<a href="/{{new.id}}/"><img src="/static/{{new.gpic}}"></a>
@@ -49,16 +48,16 @@
 
 		<div class="r_wrap fr clearfix">
 			<div class="sort_bar">
-				<a href="#" class="active">默认</a>
-				<a href="#">价格</a>
-				<a href="#">人气</a>
+				<a href="/list/{{t1.id}}/1/" class="{{mr}}" >默认</a>
+				<a href="/list_price/{{t1.id}}/1/" class="{{jg}}">价格</a>
+				<a href="/list_click/{{t1.id}}/1/" class="{{rq}}">人气</a>
 			</div>
 
 			<ul class="goods_type_list clearfix">
 				{%for gs in page%}
 				<li>
-					<a href="/detail/{{gs.id}}"><img src="/static/{{gs.gpic}}"></a>
-					<h4><a href="/detail/">{{gs.gtitle}}</a></h4>
+					<a href="/{{gs.id}}/"><img src="/static/{{gs.gpic}}"></a>
+					<h4><a href="/{{gs.id}}/">{{gs.gtitle}}</a></h4>
 					<div class="operate">
 						<span class="prize">￥{{gs.gprice}}</span>
 						<span class="unit">16.80/500g</span>

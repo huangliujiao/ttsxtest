@@ -97,7 +97,8 @@ def login_ajax_check(request):
 @percolator.perc
 def user_center_info(request):
     user = UserInfo.objects.get(pk=request.session['uid'])
-    context = {'user': user}
+    recent_list=GoodsInfo.objects.all().order_by('-gclick')[0:5]
+    context = {'user': user,'recent_list':recent_list}
     return render(request,'ttsx/user_center_info.html',context)
 
 @percolator.perc
@@ -153,6 +154,9 @@ def detail(request):
     nums = request.get_full_path().split('/')[1]
     #根据值进行查找并返回该商品对象
     gs = GoodsInfo.objects.get(id=nums)
+    # 保存商品浏览量
+    gs.gclick = gs.gclick +1
+    gs.save()
     #根据商品一对多关联的ID查找到Typeinfo的相关信息
     type1 = TypeInfo.objects.get(id=gs.gtype_id)
     #根据type1商品类型的ID获取到数据库最后两个商品信息
@@ -166,26 +170,6 @@ def detail(request):
         return render(request, 'ttsx/detail.html',context)
     else:
         context = {'title': '商品信息','gs':gs,'t1':type1,'new_list':new_list}
-        return render(request,'ttsx/detail.html',context)
-
-#在列表内点击商品进行跳转函数、tid是页面传入的要跳转页面的参数
-def list_detail(request,tid):
-    #获取到跳转路径的值
-    # nums = request.get_full_path().split('/')[1]
-    #根据值进行查找并返回该商品对象
-    gs = GoodsInfo.objects.get(id=tid)
-    #根据商品一对多关联的ID查找到Typeinfo的相关信息
-    type1 = TypeInfo.objects.get(id=gs.gtype_id)
-    #判断用户是否登录
-    if request.session.has_key('uid'):
-        #获取到用户对象
-        user = UserInfo.objects.get(pk=request.session['uid'])
-        #gs是当前商品对象、t1是当前商品类型对象、nav判断从base传入的头部框
-        context = {'user': user,'title': '商品信息', 'nav': '0','gs':gs,'t1':type1}
-        return render(request, 'ttsx/detail.html',context)
-    else:
-        #同上
-        context = {'title': '商品信息','gs':gs,'t1':type1}
         return render(request,'ttsx/detail.html',context)
 
 def list(request,tid, pindex):
@@ -205,13 +189,58 @@ def list(request,tid, pindex):
         #获取到当前用户
         user = UserInfo.objects.get(pk=request.session['uid'])
         #user当前用户、title当前页面标题、nav根据base判断传入的搜索框部分。t1是商品类型对象、page当前页码、new_list最后两个商品对象
-        context = {'user': user, 'title': '商品列表', 'nav': '0','t1':type1,'page':page,'new_list':new_list}
+        context = {'user': user, 'title': '商品列表', 'nav': '0','t1':type1,'page':page,'new_list':new_list,'mr':'active'}
         return render(request,'ttsx/list.html',context)
     else:
         #同上
-        context = {'title': '商品列表','gs_list':gs_list,'t1':type1,'new_list':new_list}
+        context = {'title': '商品列表','gs_list':gs_list,'t1':type1,'new_list':new_list,'mr':'active'}
         return render(request,'ttsx/list.html',context)
 
+def list_price(request,tid,pindex):
+    # 根据页面传入的pid参数获取到当前商品类型对象
+    type1 = TypeInfo.objects.get(id=int(tid))
+    # 根据pid获取到所有商品对象，-id代表获取到的数据为倒序
+    gs_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-gprice')
+    # 根据上面的操作获取到数据库最后两个商品的对象
+    new_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-id')[0:2]
+    # 引用Paginator类对获取到的商品对象分页显示，每页五个
+    p = Paginator(gs_list, 5)
+    # 根据传入的pindex获取到当前的页码
+    page = p.page(int(pindex))
+    # 判断是否登录
+    if request.session.has_key('uid'):
+        # 获取到当前用户
+        user = UserInfo.objects.get(pk=request.session['uid'])
+        # user当前用户、title当前页面标题、nav根据base判断传入的搜索框部分。t1是商品类型对象、page当前页码、new_list最后两个商品对象
+        context = {'user': user, 'title': '商品列表', 'nav': '0', 't1': type1, 'page': page, 'new_list': new_list,'jg':'active'}
+        return render(request, 'ttsx/list.html', context)
+    else:
+        # 同上
+        context = {'title': '商品列表', 'gs_list': gs_list, 't1': type1, 'new_list': new_list,'jg':'active'}
+        return render(request, 'ttsx/list.html', context)
+
+def list_click(request,tid,pindex):
+    # 根据页面传入的pid参数获取到当前商品类型对象
+    type1 = TypeInfo.objects.get(id=int(tid))
+    # 根据pid获取到所有商品对象，-id代表获取到的数据为倒序
+    gs_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-gclick')
+    # 根据上面的操作获取到数据库最后两个商品的对象
+    new_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-id')[0:2]
+    # 引用Paginator类对获取到的商品对象分页显示，每页五个
+    p = Paginator(gs_list, 5)
+    # 根据传入的pindex获取到当前的页码
+    page = p.page(int(pindex))
+    # 判断是否登录
+    if request.session.has_key('uid'):
+        # 获取到当前用户
+        user = UserInfo.objects.get(pk=request.session['uid'])
+        # user当前用户、title当前页面标题、nav根据base判断传入的搜索框部分。t1是商品类型对象、page当前页码、new_list最后两个商品对象
+        context = {'user': user, 'title': '商品列表', 'nav': '0', 't1': type1, 'page': page, 'new_list': new_list,'rq':'active'}
+        return render(request, 'ttsx/list.html', context)
+    else:
+        # 同上
+        context = {'title': '商品列表', 'gs_list': gs_list, 't1': type1, 'new_list': new_list,'rq':'active'}
+        return render(request, 'ttsx/list.html', context)
 def cart(request):
     #判断当前用户是否登录
     if request.session.has_key('uid'):

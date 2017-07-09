@@ -1,5 +1,10 @@
 {%extends 'ttsx/base.html'%}
 {%block body%}
+<style>
+	.tab_review	{display: none}
+	.tab_review dt{margin-top:10px;font-size:16px;color:#044d39}
+	.tab_review dd{line-height:24px;margin-top:5px;}
+</style>
 	<div class="navbar_con">
 		<div class="navbar clearfix">
 			<div class="subnav_con fl">
@@ -45,9 +50,10 @@
 			<div class="goods_num clearfix">
 				<div class="num_name fl">数 量：</div>
 				<div class="num_add fl">
-					<input type="text" class="num_show fl" value="1">
-					<a href="javascript:;" class="add fr">+</a>
-					<a href="javascript:;" class="minus fr">-</a>	
+					<input type="text" class="num_show fl" value="1" >
+					<input type="hidden" id="kucun" value="{{gs.gkucun}}">
+					<a href="javascript:;" class="add fr" >+</a>
+					<a href="javascript:;" class="minus fr" >-</a>
 				</div> 
 			</div>
 			<div class="total">总价：<em>{{gs.gprice}}元</em></div>
@@ -76,8 +82,8 @@
 
 		<div class="r_wrap fr clearfix">
 			<ul class="detail_tab clearfix">
-				<li class="active">商品介绍</li>
-				<li>评论</li>
+				<li id="active_sp" class="active">商品介绍</li>
+				<li id="active_pl">评论</li>
 			</ul>
 
 			<div class="tab_content">
@@ -87,37 +93,86 @@
 				</dl>
 			</div>
 
+			<div class="tab_review">
+				<dl>
+					<dt>客户评论：</dt>
+					<dd>祝宏伟zzz：他们家的东西真好！</dd>
+					<dd>胡敏...：很新鲜</dd>
+					<dd>黄煌：不错！下次还会再来！</dd>
+					<dd>胡旭奉：差评！等了一个星期才到货！</dd>
+					<dd>高彦：量不太多，都不够我吃的！</dd>
+					<dd>胥鑫：店主真是好人，买咸鱼还送咸鸭蛋。</dd>
+					<dd>邹伟：so TM  what ?</dd>
+				</dl>
+			</div>
+
 		</div>
 	</div>
 
-{% endblock body %}
-	<div class="add_jump"></div>
 
-	<script type="text/javascript" src="/static/js/jquery-1.12.2.js"></script>
+	<div class="add_jump"></div>
 	<script type="text/javascript">
 		$(function () {
-
-			var $add_x = $('#add_cart').offset().top;
-			var $add_y = $('#add_cart').offset().left;
-
-			var $to_x = $('#show_count').offset().top;
-			var $to_y = $('#show_count').offset().left;
-
-			$(".add_jump").css({'left':$add_y+80,'top':$add_x+10,'display':'block'})
+		    $('#active_pl').click(function () {
+		        $('.tab_content').hide()
+				$('.tab_review').show()
+				$(this).addClass("active").siblings().removeClass("active")
+            });
+			$('#active_sp').click(function () {
+		        $('.tab_review').hide()
+				$('.tab_content').show()
+				$(this).addClass("active").siblings().removeClass("active")
+            });
+		    //加入购物车
 			$('#add_cart').click(function(){
-				$(".add_jump").stop().animate({
-					'left': $to_y+7,
-					'top': $to_x+7},
-					"fast", function() {
-						$(".add_jump").fadeOut('fast',function(){
-							$('#show_count').html(2);
-						});
+			    var $add_x = $('#add_cart').offset().top;
+				var $add_y = $('#add_cart').offset().left;
 
-				});
-			})
+				var $to_x = $('#show_count').offset().top;
+				var $to_y = $('#show_count').offset().left;
 
-        });
+				$(".add_jump").css({'left':$add_y+80,'top':$add_x+10,'display':'block'})
+					$(".add_jump").stop().animate({
+						'left': $to_y+7,
+						'top': $to_x+7},
+						"fast", function() {
+							$(".add_jump").fadeOut('fast',function(){
+							    show_count_num =parseInt($('#show_count').html())
+								show_count_num++
+								$('#show_count').html(show_count_num);
+							});
+					});
+				})
+
+			//改变数量
+			$('.num_show').blur(function () {
+				num=parseInt($(this).val());
+				kucun=$('#kucun').val();
+				if(isNaN(num)){
+				    num=1;
+				}
+				if(num<1){
+				    num=1;
+				}
+				if(num>kucun){
+				    num=kucun;
+				}
+				$(this).val(num);
+
+				price=parseFloat($('.show_pirze em').text());
+				$('.total em').text((num*price).toFixed(2)+'元');
+            });
+			$('.add').click(function () {
+			    num=parseInt($('.num_show').val());
+			    num++;
+			    $('.num_show').val(num).blur();
+            });
+			$('.minus').click(function () {
+				num=parseInt($('.num_show').val());
+			    num--;
+			    $('.num_show').val(num).blur();
+            });
+		});
 	</script>
-	
-</body>
-</html>
+
+{% endblock body %}
