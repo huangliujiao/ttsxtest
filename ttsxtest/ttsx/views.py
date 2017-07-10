@@ -6,7 +6,6 @@ from hashlib  import sha1
 from .decorate import percolator
 from django.core.paginator import Paginator
 import datetime
-
 # Create your views here.
 #登录页面
 def login(request):
@@ -189,18 +188,26 @@ def list(request,tid, pindex):
         #获取到当前用户
         user = UserInfo.objects.get(pk=request.session['uid'])
         #user当前用户、title当前页面标题、nav根据base判断传入的搜索框部分。t1是商品类型对象、page当前页码、new_list最后两个商品对象
-        context = {'user': user, 'title': '商品列表', 'nav': '0','t1':type1,'page':page,'new_list':new_list,'mr':'active'}
+        context = {'user': user, 'title': '商品列表', 'nav': '0','t1':type1,
+                   'page':page,'new_list':new_list,'mr':'active'}
         return render(request,'ttsx/list.html',context)
     else:
         #同上
-        context = {'title': '商品列表','gs_list':gs_list,'t1':type1,'new_list':new_list,'mr':'active'}
+        context = {'title': '商品列表', 'nav': '0', 't1': type1,
+                   'page': page, 'new_list': new_list, 'mr': 'active'}
         return render(request,'ttsx/list.html',context)
 
 def list_price(request,tid,pindex):
+    ym = request.get_full_path().split('/')
     # 根据页面传入的pid参数获取到当前商品类型对象
     type1 = TypeInfo.objects.get(id=int(tid))
-    # 根据pid获取到所有商品对象，-id代表获取到的数据为倒序
-    gs_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-gprice')
+    if ym[4]=='?sort':
+        # 根据pid获取到所有商品对象，-id代表获取到的数据为倒序
+        gs_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-gprice')
+        sort = 1
+    else:
+        gs_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('gprice')
+        sort = 0
     # 根据上面的操作获取到数据库最后两个商品的对象
     new_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-id')[0:2]
     # 引用Paginator类对获取到的商品对象分页显示，每页五个
@@ -212,18 +219,26 @@ def list_price(request,tid,pindex):
         # 获取到当前用户
         user = UserInfo.objects.get(pk=request.session['uid'])
         # user当前用户、title当前页面标题、nav根据base判断传入的搜索框部分。t1是商品类型对象、page当前页码、new_list最后两个商品对象
-        context = {'user': user, 'title': '商品列表', 'nav': '0', 't1': type1, 'page': page, 'new_list': new_list,'jg':'active'}
+        context = {'user': user, 'title': '商品列表', 'nav': '0','sort':sort, 't1': type1, 'page': page, 'new_list': new_list,'jg':'active'}
         return render(request, 'ttsx/list.html', context)
     else:
         # 同上
-        context = {'title': '商品列表', 'gs_list': gs_list, 't1': type1, 'new_list': new_list,'jg':'active'}
+        context = {'title': '商品列表', 'nav': '0', 'sort': sort, 't1': type1, 'page': page,
+                   'new_list': new_list, 'jg': 'active'}
         return render(request, 'ttsx/list.html', context)
 
 def list_click(request,tid,pindex):
+    ym = request.get_full_path().split('/')
     # 根据页面传入的pid参数获取到当前商品类型对象
     type1 = TypeInfo.objects.get(id=int(tid))
     # 根据pid获取到所有商品对象，-id代表获取到的数据为倒序
-    gs_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-gclick')
+    if ym[4]=='?sort':
+        # 根据pid获取到所有商品对象，-id代表获取到的数据为倒序
+        gs_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-gclick')
+        sort = 1
+    else:
+        gs_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('gclick')
+        sort = 0
     # 根据上面的操作获取到数据库最后两个商品的对象
     new_list = GoodsInfo.objects.filter(gtype_id=int(tid)).order_by('-id')[0:2]
     # 引用Paginator类对获取到的商品对象分页显示，每页五个
@@ -235,11 +250,13 @@ def list_click(request,tid,pindex):
         # 获取到当前用户
         user = UserInfo.objects.get(pk=request.session['uid'])
         # user当前用户、title当前页面标题、nav根据base判断传入的搜索框部分。t1是商品类型对象、page当前页码、new_list最后两个商品对象
-        context = {'user': user, 'title': '商品列表', 'nav': '0', 't1': type1, 'page': page, 'new_list': new_list,'rq':'active'}
+        context = {'user': user, 'title': '商品列表', 'nav': '0', 't1': type1, 'page': page,
+                   'new_list': new_list,'rq':'active','sort':sort}
         return render(request, 'ttsx/list.html', context)
     else:
         # 同上
-        context = {'title': '商品列表', 'gs_list': gs_list, 't1': type1, 'new_list': new_list,'rq':'active'}
+        context = { 'title': '商品列表', 'nav': '0', 't1': type1, 'page': page,
+                   'new_list': new_list, 'rq': 'active', 'sort': sort}
         return render(request, 'ttsx/list.html', context)
 def cart(request):
     #判断当前用户是否登录

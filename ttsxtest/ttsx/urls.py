@@ -17,4 +17,5 @@ urlpatterns = [
     url(r'^$',views.index),
     url(r'^loginout/$',views.loginout),
     url(r'^\w+/$',views.detail),
+
 ]
