@@ -30,3 +30,8 @@ class GoodsInfo(models.Model):
     gkucun = models.IntegerField(default=100)
     gcontent=HTMLField()
     gtype=models.ForeignKey('TypeInfo')
+
+class CartInfo(models.Model):
+    goods=models.ForeignKey(GoodsInfo)
+    user=models.ForeignKey(UserInfo)
+    count=models.IntegerField()

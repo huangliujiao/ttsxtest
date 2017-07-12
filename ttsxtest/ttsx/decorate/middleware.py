@@ -7,5 +7,8 @@ class UrlPathMiddleware:
                                 '/user_name/',
                                 '/login/',
                                 '/login_ajax_check/',
-                                '/loginout/', ]:
+                                '/loginout/',
+                                '/islogin/',
+                                '/count/',
+                                '/add/',]:
             request.session['url_path'] = request.get_full_path()

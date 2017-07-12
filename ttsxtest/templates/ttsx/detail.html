@@ -59,7 +59,7 @@
 			<div class="total">总价：<em>{{gs.gprice}}元</em></div>
 			<div class="operate_btn">
 				<a href="javascript:;" class="buy_btn">立即购买</a>
-				<a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>				
+				<a href="javascript:add_cart({{gs.id}});" class="add_cart" id="add_cart">加入购物车</a>
 			</div>
 		</div>
 	</div>
@@ -112,7 +112,27 @@
 
 	<div class="add_jump"></div>
 	<script type="text/javascript">
+		function add_cart(gid) {
+
+			$.get('/islogin/',function (data) {
+				if (data.islogin=='1'){
+				    count=$('.num_show').val()
+					$.get('/add/',{'gid':gid,'count':count},function (data) {
+						if(data.isadd=='1'){
+							alert('购买成功！')
+						}else {
+
+							alert('购买失败，请登录后重试。')
+						}
+					});
+				}else {
+					location.href = '/login/'
+				}
+			});
+		}
+
 		$(function () {
+		    //商品评论
 		    $('#active_pl').click(function () {
 		        $('.tab_content').hide()
 				$('.tab_review').show()
@@ -138,7 +158,7 @@
 						"fast", function() {
 							$(".add_jump").fadeOut('fast',function(){
 							    show_count_num =parseInt($('#show_count').html())
-								show_count_num++
+								show_count_num=show_count_num+parseInt($('.num_show').val())
 								$('#show_count').html(show_count_num);
 							});
 					});

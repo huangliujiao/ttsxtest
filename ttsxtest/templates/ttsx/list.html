@@ -1,6 +1,31 @@
 {%extends 'ttsx/base.html'%}
 {% block body %}
-	<div class="navbar_con">
+<script>
+	function add_cart(gid) {
+		$.get('/islogin/',function (data) {
+			if (data.islogin=='1'){
+				$.get('/add/',{'gid':gid},function (data) {
+					if(data.isadd=='1'){
+						alert('购买成功！')
+						if($('.login_btn').text().indexOf('登录')<0){
+							$.get('/count/',function (data) {
+									$('#show_count').text(data.count);
+								});
+							}
+					}else {
+
+					    alert('购买失败，请登录后重试。')
+					}
+
+                });
+			}else {
+				location.href = '/login/'
+			}
+        });
+
+    }
+</script>
+	<div class="navbar_con">a
 		<div class="navbar clearfix">
 			<div class="subnav_con fl">
 				<h1>全部商品分类</h1>	
@@ -24,8 +49,8 @@
 		</div>
 	</div>
 
-	<div class="breadcrumb">
-		<a href="#">全部分类</a>
+	<div class="breadcrumb" style=" float: left;margin-left: 75px;">
+		<a href="#" style="float: left">全部分类</a>
 		<span>></span>
 		<a href="#">{{t1.ttitle}}</a>
 	</div>
@@ -73,7 +98,7 @@
 					<div class="operate">
 						<span class="prize">￥{{gs.gprice}}</span>
 						<span class="unit">16.80/500g</span>
-						<a href="#" class="add_goods" title="加入购物车"></a>
+						<a href="javascript:add_cart({{gs.id}});" class="add_goods" title="加入购物车"></a>
 					</div>
 				</li>
 				{%endfor%}

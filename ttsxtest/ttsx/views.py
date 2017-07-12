@@ -1,7 +1,7 @@
 #coding=utf-8
 from django.shortcuts import render,redirect
 from .models import *
-from django.http import JsonResponse,HttpResponse
+from django.http import JsonResponse,response
 from hashlib  import sha1
 from .decorate import percolator
 from django.core.paginator import Paginator
@@ -58,6 +58,15 @@ def register_check(request):
     else:
         #如果不相等，则返回到注册页面，并传入用户之前输入的用户名、密码、邮箱
         return render(request,'ttsx/register.html',{'user_name':user_name,'pwd':pwd,'email':email})
+
+def islogin(request):
+    result = 0
+    if request.session.has_key('uid'):
+        result = 1
+        return JsonResponse({'islogin':result})
+    else:
+        return JsonResponse({'islogin':result})
+
 #用户名验证是否被注册
 def user_name(request):
     #获取到用户名
@@ -66,7 +75,6 @@ def user_name(request):
     nums=UserInfo.objects.filter(uname=user_name).count()
     #JsonResponse返回数据库里有多少个用户名
     return JsonResponse({'nums':nums})
-
 
 # ajax登录校验
 def login_ajax_check(request):
@@ -97,7 +105,9 @@ def login_ajax_check(request):
 def user_center_info(request):
     user = UserInfo.objects.get(pk=request.session['uid'])
     recent_list=GoodsInfo.objects.all().order_by('-gclick')[0:5]
-    context = {'user': user,'recent_list':recent_list}
+    ids = request.COOKIES.get('goods_ids').split(',')[:-1]
+    goods_ids=GoodsInfo.objects.filter(id__in=ids)
+    context = {'user': user,'recent_list':recent_list,'goods_ids':goods_ids}
     return render(request,'ttsx/user_center_info.html',context)
 
 @percolator.perc
@@ -145,14 +155,14 @@ def index(request):
         return render(request,'ttsx/index.html',context)
     else:
         #同上
-        context = {'list1': list1, 'title': '首页'}
+        context = {'list1': list1, 'title': '首页', 'nav': '0'}
         return render(request,'ttsx/index.html',context)
 
-def detail(request):
+def detail(request,id):
     #获取到跳转路径的值
     nums = request.get_full_path().split('/')[1]
     #根据值进行查找并返回该商品对象
-    gs = GoodsInfo.objects.get(id=nums)
+    gs = GoodsInfo.objects.get(pk=nums)
     # 保存商品浏览量
     gs.gclick = gs.gclick +1
     gs.save()
@@ -162,13 +172,22 @@ def detail(request):
     new_list = GoodsInfo.objects.filter(gtype_id=type1.id).order_by('-id')[0:2]
     #如果该用户登录了就执行if
     if request.session.has_key('uid'):
+
         #获取到用户对象传入页面，base页面会判断是否传入用户信息
         user = UserInfo.objects.get(pk=request.session['uid'])
         #user用户对象、title网页名称、nav在base页面判断传入1则显示用户搜索框、gs是当前商品对象、t1是商品类型对象、new_list是最后两个商品信息
         context = {'user': user,'title': '商品信息', 'nav': '0','gs':gs,'t1':type1,'new_list':new_list}
-        return render(request, 'ttsx/detail.html',context)
+        response = render(request, 'ttsx/detail.html',context)
+        ids = request.COOKIES.get('goods_ids', '').split(',')
+        if id in ids:
+            ids.remove(id)
+        ids.insert(0, id)
+        if len(ids) > 6:
+            ids.pop()
+        response.set_cookie('goods_ids', ','.join(ids), max_age=60 * 60 * 24 * 7)
+        return response
     else:
-        context = {'title': '商品信息','gs':gs,'t1':type1,'new_list':new_list}
+        context = {'title': '商品信息','gs':gs, 'nav': '0','t1':type1,'new_list':new_list}
         return render(request,'ttsx/detail.html',context)
 
 def list(request,tid, pindex):
@@ -190,6 +209,7 @@ def list(request,tid, pindex):
         #user当前用户、title当前页面标题、nav根据base判断传入的搜索框部分。t1是商品类型对象、page当前页码、new_list最后两个商品对象
         context = {'user': user, 'title': '商品列表', 'nav': '0','t1':type1,
                    'page':page,'new_list':new_list,'mr':'active'}
+
         return render(request,'ttsx/list.html',context)
     else:
         #同上
@@ -258,13 +278,69 @@ def list_click(request,tid,pindex):
         context = { 'title': '商品列表', 'nav': '0', 't1': type1, 'page': page,
                    'new_list': new_list, 'rq': 'active', 'sort': sort}
         return render(request, 'ttsx/list.html', context)
+
 def cart(request):
-    #判断当前用户是否登录
+    try:
+        #判断当前用户是否登录
+        if request.session.has_key('uid'):
+            #获取到当前用户
+            user = UserInfo.objects.get(pk=request.session['uid'])
+            cart_list = CartInfo.objects.filter(user_id=user.id)
+            context = {'user': user, 'title': '购物车', 'nav': '0','cart_list':cart_list}
+            return render(request,'ttsx/cart.html',context)
+        else:
+            context = {'title': '购物车'}
+            return render(request, 'ttsx/login.html',context)
+    except:
+        return render(request,'ttsx/404.html')
+
+def add(request):
+    try:
+        uid=request.session.get('uid')
+        gid=int(request.GET.get('gid'))
+        print(uid)
+        count = int(request.GET.get('count','1'))
+        counts=CartInfo.objects.filter(goods_id=gid,user_id=uid).count()
+        if counts>0:
+            usergs = CartInfo.objects.get(goods_id=gid,user_id=uid)
+            usergs.count +=count
+            usergs.save()
+            return JsonResponse({'isadd': 1})
+        else:
+            cart=CartInfo()
+            cart.user_id = uid
+            cart.goods_id = gid
+            cart.count = count
+            cart.save()
+            return JsonResponse({'isadd':1})
+    except:
+        return JsonResponse({'isadd':0})
+def count(request):
+    # 判断当前用户是否登录
     if request.session.has_key('uid'):
-        #获取到当前用户
-        user = UserInfo.objects.get(pk=request.session['uid'])
-        context = {'user': user, 'title': '购物车', 'nav': '0'}
-        return render(request,'ttsx/cart.html',context)
+        # 获取到当前用户
+        userCounts = CartInfo.objects.filter(user_id=request.session['uid'])
+        count = 0
+        for user in userCounts:
+            count += user.count
+        return JsonResponse({'count':count})
+def search_action(request):
+    commodity = request.GET.get('commodity')
+    if request.GET.get('page'):
+        pindex=request.GET.get('page')
+        pindex=int(pindex)
     else:
-        context = {'title': '购物车'}
-        return render(request, 'ttsx/cart.html',context)
+        pindex = 1
+    gs_list = GoodsInfo.objects.filter(gtitle__contains=commodity)
+    # 引用Paginator类对获取到的商品对象分页显示，每页五个
+    p = Paginator(gs_list, 6)
+    # 根据获取的pindex获取到当前的页码
+    page_list=p.page_range
+    page_obj = p.page(pindex)
+    if request.session.has_key('uid'):
+        user = UserInfo.objects.get(pk=request.session['uid'])
+        context = {'page_obj':page_obj,'commodity':commodity,'page_list':page_list,'user': user, 'title': '搜素页'}
+    else:
+        context = {'page_obj': page_obj, 'commodity': commodity, 'page_list': page_list}
+    return render(request,'search/search.html',context)
+

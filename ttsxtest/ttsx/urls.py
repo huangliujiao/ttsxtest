@@ -1,6 +1,7 @@
 #coding=utf-8
 from django.conf.urls import url
 from . import views
+from .search_view import *
 urlpatterns = [
     url(r'^login/$',views.login),
     url(r'^register/$',views.register),
@@ -10,12 +11,17 @@ urlpatterns = [
     url(r'^user_center_info/$',views.user_center_info),
     url(r'^user_center_order/$',views.user_center_order),
     url(r'^user_center_site/$',views.user_center_site),
-    url(r'^cart/$',views.cart),
     url(r'^list/(\d+)/(\d+)/$',views.list),
     url(r'^list_price/(\d+)/(\d+)/$',views.list_price),
     url(r'^list_click/(\d+)/(\d+)/$',views.list_click),
     url(r'^$',views.index),
     url(r'^loginout/$',views.loginout),
-    url(r'^\w+/$',views.detail),
+    url('^search_action/$', views.search_action),
+    url(r'^(\d+)/$',views.detail),
+    url(r'^islogin/$',views.islogin),
+    url(r'^cart/$', views.cart),
+    url(r'^add/$', views.add),
+    url(r'^count/$', views.count),
+
 
 ]

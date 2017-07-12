@@ -1,21 +1,41 @@
 {%extends 'ttsx/base.html'%}
 
-{%block detail%}
+{% block body %}
     <div class="main_wrap clearfix">
         <ul class="goods_type_list clearfix">
             {%for goods in page_obj%}
             <li>
-                <a href="/{{goods.object.id}}/"><img src="/static/{{goods.object.gpic}}"></a>
-                <h4><a href="/{{goods.object.id}}/">{{goods.object.gtitle}}</a></h4>
+                <a href="/{{goods.id}}/"><img src="/static/{{goods.gpic}}"></a>
+                <h4><a href="/{{goods.id}}/">{{goods.gtitle}}</a></h4>
                 <div class="operate">
-                    <span class="prize">￥{{goods.object.gprice}}</span>
-                    <span class="unit">{{goods.object.gprice}}/{{goods.object.gunit}}</span>
+                    <span class="prize">￥{{goods.gprice}}</span>
+                    <span class="unit">{{goods.gprice}}/{{goods.gunit}}</span>
                     <a href="#" class="add_goods" title="加入购物车"></a>
                 </div>
             </li>
             {%endfor%}
         </ul>
-    </div>
-{%endblock detail%}
+        <div class="pagenation">
 
-{%block left%} {%endblock left%}
+            <a href="?commodity={{commodity}}&page=1">首页</a>&nbsp;&nbsp;
+            {%if page_obj.has_previous%}
+            <a href="?commodity={{commodity}}&page={{page_obj.number|add:-1}}">上一页</a>
+            {%endif%}
+
+            {%for pindex in page_list%}
+            {%if pindex == page_obj.number%}
+            <a href="#" class="active">{{pindex}}</a>
+            {%else%}
+            <a href="?commodity={{commodity}}&page={{pindex}}">{{pindex}}</a>
+            {%endif%}
+            {%endfor%}
+
+            {%if page_obj.has_next%}
+            <a href="?commodity={{commodity}}&page={{page_obj.number|add:1}}">下一页></a>&nbsp;&nbsp;
+            {%endif%}
+            <a href="?commodity={{commodity}}&page={{page_obj.paginator.num_pages}}">末页></a>
+        </div>
+    </div>
+{% endblock body %}
+
+
