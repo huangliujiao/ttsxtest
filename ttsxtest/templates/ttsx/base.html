@@ -90,9 +90,9 @@
 </body>
 </html>
 <script>
-		if($('.login_btn').text().indexOf('登录')<0){
-			$.get('/count/',function (data) {
-				$('#show_count').text(data.count);
-			});
-		}
+	if($('.login_btn').text().indexOf('登录')<0){
+		$.get('/count/',function (data) {
+			$('#show_count').text(data.count);
+		});
+	}
 </script>

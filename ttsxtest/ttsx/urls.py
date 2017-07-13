@@ -22,6 +22,8 @@ urlpatterns = [
     url(r'^cart/$', views.cart),
     url(r'^add/$', views.add),
     url(r'^count/$', views.count),
-
+    url(r'^place_order/$',views.place_order),
+    url(r'^edit/$',views.edit),
+    url(r'^deletes/$',views.deletes),
 
 ]

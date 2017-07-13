@@ -10,5 +10,10 @@ class UrlPathMiddleware:
                                 '/loginout/',
                                 '/islogin/',
                                 '/count/',
-                                '/add/',]:
+                                '/add/',
+                                '/deletes/',
+                                '/edit/',
+                                '/place_order/',
+                                '/cart/',
+                                            ]:
             request.session['url_path'] = request.get_full_path()

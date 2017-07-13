@@ -5,6 +5,7 @@ from django.http import JsonResponse,response
 from hashlib  import sha1
 from .decorate import percolator
 from django.core.paginator import Paginator
+from django.http import QueryDict
 import datetime
 # Create your views here.
 #登录页面
@@ -294,6 +295,17 @@ def cart(request):
     except:
         return render(request,'ttsx/404.html')
 
+def place_order(request):
+    try:
+        cartGoods=request.GET.getlist('cartGoods')
+        print(cartGoods)
+        cart_list = []
+        user = UserInfo.objects.get(pk=request.session['uid'])
+        for cart in cartGoods:
+            cart_list.append(CartInfo.objects.get(id=cart))
+        return render(request,'ttsx/place_order.html',{'user':user,'cart_list':cart_list})
+    except:
+        return render(request, 'ttsx/404.html')
 def add(request):
     try:
         uid=request.session.get('uid')
@@ -315,6 +327,18 @@ def add(request):
             return JsonResponse({'isadd':1})
     except:
         return JsonResponse({'isadd':0})
+
+def deletes(request):
+    try:
+        cid=request.GET.get('cid')
+        print(cid)
+        cgoos=CartInfo.objects.get(id=cid)
+        cgoos.delete()
+        return JsonResponse({'msg':'ok'})
+    except:
+        return JsonResponse({'msg':'err'})
+
+
 def count(request):
     # 判断当前用户是否登录
     if request.session.has_key('uid'):
@@ -324,6 +348,16 @@ def count(request):
         for user in userCounts:
             count += user.count
         return JsonResponse({'count':count})
+
+def edit(request):
+    cid=request.GET.get('cid')
+    numShow = request.GET.get('numShow')
+    cartobj=CartInfo.objects.get(id=cid)
+    cartobj.count = numShow
+    cartobj.save()
+    return JsonResponse({'count':numShow})
+
+
 def search_action(request):
     commodity = request.GET.get('commodity')
     if request.GET.get('page'):
@@ -339,8 +373,8 @@ def search_action(request):
     page_obj = p.page(pindex)
     if request.session.has_key('uid'):
         user = UserInfo.objects.get(pk=request.session['uid'])
-        context = {'page_obj':page_obj,'commodity':commodity,'page_list':page_list,'user': user, 'title': '搜素页'}
+        context = {'page_obj':page_obj,'commodity':commodity,'nav':'0','page_list':page_list,'user': user, 'title': '搜素页'}
     else:
-        context = {'page_obj': page_obj, 'commodity': commodity, 'page_list': page_list}
+        context = {'page_obj': page_obj, 'commodity': commodity,'nav':'0', 'page_list': page_list}
     return render(request,'search/search.html',context)
 
