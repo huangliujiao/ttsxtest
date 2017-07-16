@@ -15,5 +15,5 @@ class UrlPathMiddleware:
                                 '/edit/',
                                 '/place_order/',
                                 '/cart/',
-                                            ]:
+                                 '/do_order/',  ]:
             request.session['url_path'] = request.get_full_path()

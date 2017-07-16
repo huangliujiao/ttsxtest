@@ -25,5 +25,6 @@ urlpatterns = [
     url(r'^place_order/$',views.place_order),
     url(r'^edit/$',views.edit),
     url(r'^deletes/$',views.deletes),
+    url(r'^do_order/$',views.do_order),
 
 ]
