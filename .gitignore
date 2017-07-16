@@ -1,1 +1,15 @@
+<<<<<<< HEAD
 *.pyc
+=======
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist
+build
+.idea/
+>>>>>>> cce7b3c1675d3ce45a31bea0226f178e75a4a047
